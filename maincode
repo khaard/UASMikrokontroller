@@ -1,0 +1,84 @@
+#include <LiquidCrystal.h>
+
+const int rs = 13, en = 12, d4 = 5, d5 = 4, d6 = 3, d7 = 2; 
+LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
+
+int led = 7;
+
+float temp;
+int tempPin = A1;
+int relayPin = 8;
+
+#define fan 9
+
+void setup(){
+	pinMode(fan, OUTPUT);
+    pinMode(relayPin, OUTPUT); 
+	pinMode(led, OUTPUT);  	
+}
+void loop()
+{
+
+  
+  lcd.setCursor(2, 1);
+  lcd.print("Suhu..");
+  delay(3000);
+  lcd.clear();
+  lcd.setCursor(0,2);
+  temp = analogRead(tempPin);
+  float voltage = temp * 5.0;
+ 	voltage /= 1024.0;   
+  float temperatureC = (voltage - 0.5) * 100 ;
+   
+  lcd.setCursor(0, 0);
+  lcd.print("Suhu = ");
+  lcd.setCursor(2,1);
+  
+  lcd.print(temperatureC); lcd.println(" C");
+  delay(3000);
+  lcd.clear();
+  
+  
+  if(temperatureC >= 20)
+  {
+  	poweronRelay();
+    if(temperatureC >= 20 && temperatureC <= 25)
+    {
+      analogWrite(fan,100);
+      lcd.print("Fan Speed: 50% ");
+      delay(2000);
+      lcd.clear();
+    }
+    else if(temperatureC >= 25)
+    {
+      analogWrite(fan,200);
+      lcd.print("Fan Speed: 100% ");
+      delay(2000);
+      lcd.clear();
+    }
+  }
+  else if(temperatureC < 20)
+  {
+  	poweroffRelay();
+  }
+    
+}
+
+void poweronRelay()
+  {
+    digitalWrite(relayPin, HIGH);
+    digitalWrite(led, HIGH);
+    lcd.print("Fan ON");
+    delay(2000);
+    lcd.clear();
+  }
+
+void poweroffRelay()
+  {
+  	digitalWrite(relayPin, LOW);
+    digitalWrite(led, LOW);
+  	analogWrite(fan,0);
+    lcd.print("Fan OFF");
+    delay(2000);
+    lcd.clear();
+  }
